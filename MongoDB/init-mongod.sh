@@ -17,7 +17,7 @@ fi
 if [ -d $MONGO_DAT ]
 then
     echo "Initializing MongoDB @ $MONGO_PRT..."
-    mongod --port $MONGO_PRT --dbpath $MONGO_DAT --logpath $MONGO_LOG --pidfilepath $MONGO_PID &
+    mongod --port "$MONGO_PRT" --dbpath "$MONGO_DAT" --logpath "$MONGO_LOG" --pidfilepath "$MONGO_PID" &
     echo "Done!"
 else
     echo "Cannot initialize MongoDB..."

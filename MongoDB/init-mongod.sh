@@ -1,5 +1,5 @@
 # basic vars...
-MONGO_BIN="/usr/local/packages/mongodb-osx-x86_64-3.0.5"
+MONGO_BIN="/usr/local/pkg/mongodb-3.0.5"
 MONGO_PRT="27017"
 MONGO_PWD=$(pwd)
 MONGO_DAT="$MONGO_PWD/mongod.dat"

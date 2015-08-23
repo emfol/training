@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # basic vars...
 MONGO_BIN="/usr/local/pkg/mongodb-3.0.5"
 MONGO_PRT="27017"

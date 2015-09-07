@@ -4,3 +4,7 @@
 # Temp Folders...
 tmp/
 
+# Java Class Files + target folder...
+target/
+*.class
+

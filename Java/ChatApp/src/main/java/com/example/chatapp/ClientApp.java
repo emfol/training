@@ -5,7 +5,6 @@ import java.lang.String;
 import java.lang.Integer;
 import java.lang.System;
 
-import java.io.Console;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.OutputStreamWriter;
@@ -29,7 +28,7 @@ public final class ClientApp extends Object {
     private static String appServerHost;
     private static int appServerPort;
     private static InetSocketAddress appServerSockerAddress;
-    private static Console appConsole;
+    private static BufferedReader appInput;
 
     private boolean _shouldContinue;
     private Socket _socket;
@@ -111,7 +110,7 @@ public final class ClientApp extends Object {
 
         do {
 
-            cmd = ClientApp.appConsole.readLine();
+            cmd = ClientApp.appInput.readLine();
             if ( cmd == null || cmd.equalsIgnoreCase( "QUIT" ) ) {
                 shouldContinue = false;
             } else if ( cmd.equalsIgnoreCase( "RESTART" ) ) {
@@ -191,10 +190,7 @@ public final class ClientApp extends Object {
         iSysProp = null;
 
         // app input...
-        ClientApp.appConsole = System.console();
-        if ( ClientApp.appConsole == null ) {
-            System.err.println( "Error #1: No console..." );
-        }
+        ClientApp.appInput = new BufferedReader( new InputStreamReader( System.in ) );
 
         // run app!
         ClientApp app = new ClientApp();

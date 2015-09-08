@@ -166,6 +166,9 @@ public final class ServerApp extends Object implements Runnable {
 
             }
 
+            // destroy server socket...
+            serverSocket.close();
+
         } catch ( IOException e ) {
             System.err.println( "Error #2: ".concat( e.getMessage() ) );
         }

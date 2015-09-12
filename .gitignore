@@ -1,10 +1,14 @@
 # OS X Finder
 .DS_Store
 
-# Temp Folders...
+# Folders
+target/
+build/
 tmp/
 
-# Java Class Files + target folder...
-target/
+# Binary Files
 *.class
+*.out
+*.bin
+*.o
 

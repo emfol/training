@@ -29,7 +29,7 @@
 int main( int argc, char *argv[] ) {
 
     struct sockaddr_in server_addr;
-    char *imsg, *host, *emsg, buf[BUFSIZ];
+    char *imsg, *host, *emsg = "", buf[BUFSIZ];
     int res, port, imsg_len, recv_len, scktfd = -1;
 
     if ( argc < 3 || argc > 4 ) {
@@ -46,10 +46,11 @@ int main( int argc, char *argv[] ) {
         emsg = MSG_IMSG_TOOSHORT;
         goto _abort;
     }
+    imsg_len++; /* include terminating null byte (\0)... */
 
     /* let's show some action... */
     printf(
-        "Echo Client App\n  message: %s\n  host...: %s\n  port...: %d\n\n",
+        "Echo Client App\n  message: %s\n  host...: %s\n  port...: %d\n\n> ",
         imsg,
         host,
         port

@@ -28,10 +28,10 @@ server: $(APP_SERVER_DST)
 client: $(APP_CLIENT_DST)
 
 $(APP_SERVER_DST): $(DIR_DST) $(APP_SERVER_SRC)
-	$(CC) -Wall -ansi -o $(APP_SERVER_DST) $(APP_SERVER_SRC)
+	$(CC) -Wall -ansi -pedantic -o $(APP_SERVER_DST) $(APP_SERVER_SRC)
 
 $(APP_CLIENT_DST): $(DIR_DST) $(APP_CLIENT_SRC)
-	$(CC) -Wall -ansi -o $(APP_CLIENT_DST) $(APP_CLIENT_SRC)
+	$(CC) -Wall -ansi -pedantic -o $(APP_CLIENT_DST) $(APP_CLIENT_SRC)
 
 $(DIR_DST):
 	mkdir $(DIR_DST)

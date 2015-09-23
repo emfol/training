@@ -64,6 +64,7 @@ int main( int argc, char *argv[] ) {
     printf( "Server started @ %d...\n", port );
 
     do {
+        clnt_addrlen = sizeof(struct sockaddr_in);
         clnt_fd = accept( srv_fd, (struct sockaddr *)&clnt_addr, &clnt_addrlen );
         if ( clnt_fd < 0 ) {
             emsg = MSG_LISTENQUEUE;

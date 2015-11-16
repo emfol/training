@@ -4,7 +4,9 @@
 # Folders
 target/
 build/
+bin/
 tmp/
+.cache/
 
 # Binary Files
 *.class

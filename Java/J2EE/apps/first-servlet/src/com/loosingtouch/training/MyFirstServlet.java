@@ -9,12 +9,13 @@ import java.util.Date;
 
 public class MyFirstServlet extends HttpServlet {
 
+    @Override
     public void doGet( HttpServletRequest req, HttpServletResponse res )
         throws IOException {
 
-        PrintWriter out = res.getWriter();
         Date date = new Date();
-        out.println( "Hi!" );
+        PrintWriter out = res.getWriter();
+        out.println( "Hello World!" );
         out.println( "Today is: " + date.toString() );
 
     }

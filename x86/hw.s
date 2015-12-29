@@ -19,14 +19,23 @@ section .text
         add esp, 4
 
         ; call "_exit"
-        call _exit
+        push dword 0
+        call _sys.exit
+        ; execution will very very probably never get to this point...
+        add esp, 4
 
         mov esp, ebp
         pop ebp
         ret
 
 
-    _kern:
+    _sys:
+        .exit:
+        mov eax, 1 ; service number for "exit"
+        jmp .trap
+        .write:
+        mov eax, 4 ; service number for "write"
+        .trap:
         int 0x80 ; trap into kernel space...
         ret
 
@@ -60,21 +69,7 @@ section .text
         call _strlen
         mov [ esp + 4 ], eax ; replace last parameter [EBP-4] with returned value
         push dword 1 ; file descriptor for "stdout"
-        mov eax, 4 ; service number for "write"
-        call _kern ; epilog will do all clean up
-        ; epilog
-        mov esp, ebp
-        pop ebp
-        ret
-
-
-     _exit:
-        ; prolog
-        push ebp
-        mov ebp, esp
-        push dword 0 ; successful exit code
-        mov eax, 1 ; service number for "exit"
-        call _kern
+        call _sys.write
         ; epilog
         mov esp, ebp
         pop ebp

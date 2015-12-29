@@ -36,12 +36,13 @@ section .text
         push ebp
         mov ebp, esp
         push edi ; save EDI since it will be used by SCAS instruction
+        mov edx, [ ebp + 8 ] ; save first parameter to EDX
         ; prepare for SCASB instruction
-        mov edi, [ ebp + 8 ]
-        xor eax, eax
+        mov edi, edx
+        mov al, 0
         cld
         repne scasb
-        sub edi, [ ebp + 8 ]
+        sub edi, edx
         mov eax, edi ; set return value
         ; epilog
         pop edi

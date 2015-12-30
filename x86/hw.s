@@ -9,6 +9,7 @@ section .data
 
 section .text
 
+    extern utils_strlen
     global start
     start:
 
@@ -99,34 +100,12 @@ section .text
         ret
 
 
-    _strlen:
-        ; prolog
-        push ebp
-        mov ebp, esp
-        push edi ; save EDI since it will be used by SCAS instruction
-        mov edx, [ ebp + 8 ] ; save first parameter to EDX
-        ; prepare for SCASB instruction
-        mov ecx, -1
-        mov edi, edx
-        mov al, 0
-        cld
-        repne scasb
-        sub edi, edx
-        mov eax, edi ; set return value
-        dec eax
-        ; epilog
-        pop edi
-        mov esp, ebp
-        pop ebp
-        ret
-
-
     _print:
         ; prolog
         push ebp
         mov ebp, esp
         push dword [ ebp + 8 ]
-        call _strlen
+        call utils_strlen
         add esp, 4
         push eax
         push dword [ ebp + 8 ]

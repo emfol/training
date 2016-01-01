@@ -20,7 +20,6 @@ utils_strlen:
     jmp .next
 .done:
     ; epilog
-    mov esp, ebp
     pop ebp
     ret
 

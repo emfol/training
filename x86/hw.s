@@ -4,12 +4,13 @@ bits 32
 
 section .data
     _msg: db "Hello, World...", 0x0A, 0x0A, 0x00
-    _arg: db "Arguments:", 0x0A, 0x00
-    _sep: db 0x0A, "  > ", 0x00
+    _arg: db "Arguments:", 0x0A, 0x0A, 0x00
+    _fmt: db '  > "%s" + [%s] + (%s) = 100%% :-)', 0x0A, 0x00
 
 section .text
 
     extern utils_strlen
+    extern utils_sprintf
     global start
     start:
 
@@ -40,49 +41,55 @@ section .text
         ; prolog
         push ebp
         mov ebp, esp
-        sub esp, 4 ; int i
 
         ; check if any argument is given
         mov eax, [ ebp + 8 ]
         cmp eax, 1
         jle .default
 
+        ; [ EBP - 4 ] = $i
+        ; [ EBP - 8 ] = $buf
+        sub esp, 1028 ; alloc space for locals
+        ; print header message
+        push dword _arg
+        call _print
+        add esp, 4
         ; print loop
-        sub esp, 4 ; make room for "_print" argument
-        mov eax, _arg
-        mov [ esp ], eax
-        call _print ; leave ESP as is
-        xor eax, eax
-        mov [ ebp - 4 ], eax ; ... i = 0
-        jmp .lpt0
-        .lp0:
-        mov eax, _sep
-        mov [ esp ], eax
+        ; init $i
+        mov dword [ ebp - 4 ], 1
+        jmp .test
+    .loop:
+        mov eax, [ ebp + 12 ] ; load argv
+        mov eax, [ eax + ecx * 4 ] ; argv + i
+        lea edx, [ ebp - 1028 ]
+        push eax
+        push eax
+        push eax
+        push _fmt
+        push edx
+        call utils_sprintf
+        add esp, 20
+        lea eax, [ ebp - 1028 ]
+        push eax
         call _print
+        add esp, 4
+    .test:
         mov ecx, [ ebp - 4 ]
-        mov eax, [ ebp + 12 ]
-        mov eax, [ eax + ecx * 4 ]
-        mov [ esp ], eax
-        call _print
-        .lpt0:
-        lea eax, [ ebp - 4 ] ; &i
-        mov ecx, [ eax ]
-        inc ecx
-        mov [ eax ], ecx ; ... ++i
-        mov eax, [ ebp + 8 ] ; load argc
-        cmp eax, ecx
-        jg .lp0
-        add esp, 4 ; get rid of "_print" argument
+        inc dword [ ebp - 4 ]
+        cmp [ ebp + 8 ], ecx
+        jg .loop
+
+        add esp, 1028
         mov eax, 66 ; set status code
         jmp .leave
 
-        .default:
+    .default:
         push dword _msg
         call _print
         add esp, 4
         mov eax, 65 ; set status code
 
-        .leave:
+    .leave:
         ; epilog
         mov esp, ebp
         pop ebp

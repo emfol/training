@@ -55,50 +55,47 @@ utils_sprintf:
     ; [ EBP + 12 ] = format string address
     ; [ EBP + 16 ] = argument vector
     ; # LOCALS:
-    ; [ EBP -  4 ] = ESI BACKUP
-    ; [ EBP -  8 ] = EDI BACKUP
-    ; [ EBP - 12 ] = $SI
-    ; [ EBP - 16 ] = $DI
-    ; [ EBP - 20 ] = $ARG_INDEX
+    ; [ EBP -  4 ] = $SRC
+    ; [ EBP -  8 ] = $DST
+    ; [ EBP - 12 ] = $ARG
 
     ; # PROLOG
     push ebp
     mov ebp, esp
-    sub esp, 20 ; alloc space for locals ( dword * 5 )
-    ; register backup
-    mov [ ebp - 4 ], esi
-    mov [ ebp - 8 ], edi
+    sub esp, 12 ; alloc space for locals
 
     ; # PAYLOAD
     ; initialization
-    xor ecx, ecx
-    mov [ ebp - 20 ], ecx
 
-    mov edi, [ ebp + 8 ]
-    mov [ ebp - 16 ], edi
+    mov eax, [ ebp + 8 ] ; buffer address
+    mov [ ebp - 8 ], eax ; ... to $DST
 
-    mov esi, [ ebp + 12 ]
-    mov [ ebp - 12 ], esi
+    mov eax, [ ebp + 12 ] ; format string address
+    mov [ ebp - 4 ], eax ; ... to $SRC
+
+    xor eax, eax ; zero out EAX
+    mov [ ebp - 12 ], eax ; ... to $ARG
 
     jmp .loop
 
     ; # SUBROUTINES
 .getc:
-    mov al, [ esi ]
-    inc esi
+    mov edx, [ ebp - 4 ]
+    mov al, [ edx ]
+    inc edx
+    mov [ ebp - 4 ], edx
     ret
 .putc:
-    mov [ edi ], al
-    inc edi
+    mov edx, [ ebp - 8 ]
+    mov [ edx ], al
+    inc edx
+    mov [ ebp - 8 ], edx
     ret
 .geta:
-    ; returns:
-    ;   ECX: next argument index
-    ;   EDX: argument address
-    mov ecx, [ ebp - 20 ]
-    lea edx, [ ebp + ecx * 4 + 16 ]
+    mov ecx, [ ebp - 12 ]
+    mov eax, [ ebp + ecx * 4 + 16 ]
     inc ecx
-    mov [ ebp - 20 ], ecx
+    mov [ ebp - 12 ], ecx
     ret
 
 .loop:
@@ -127,29 +124,22 @@ utils_sprintf:
     call .putc
     jmp .loop
 .arg.str: ; write string
-    ; safety copy of important registers
-    mov [ ebp - 12 ], esi
-    mov [ ebp - 16 ], edi
     call .geta
-    push edi
-    push dword [ edx ]
+    push dword [ ebp - 8 ]
+    push eax
     call utils_strcpy
     add esp, 8
-    mov esi, [ ebp - 12 ]
-    mov edi, [ ebp - 16 ]
-    add edi, eax
+    add [ ebp - 8 ], eax
     jmp .loop
 
 .done:
-    mov byte [ edi ], 0 ; terminate destination string
+    mov eax, [ ebp - 8 ]
+    mov byte [ eax ], 0 ; terminate destination string
     ; returns the number of bytes written to buffer
-    mov eax, edi
     sub eax, [ ebp + 8 ]
 
     ; # EPILOG
-    ; retore backup
-    mov esi, [ ebp - 4 ]
-    mov edi, [ ebp - 8 ]
+    ; no need for "add esp, 12"
     mov esp, ebp
     pop ebp
     ret

@@ -93,11 +93,12 @@ utils_sprintf:
     ret
 .geta:
     ; returns:
-    ;   ECX: argument index
+    ;   ECX: next argument index
     ;   EDX: argument address
     mov ecx, [ ebp - 20 ]
     lea edx, [ ebp + ecx * 4 + 16 ]
-    inc dword [ ebp - 20 ]
+    inc ecx
+    mov [ ebp - 20 ], ecx
     ret
 
 .loop:

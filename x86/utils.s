@@ -6,11 +6,15 @@ bits 32
 section .text
 
 global utils_strlen
+global _utils_strlen
 global utils_strcpy
+global _utils_strcpy
 global utils_sprintf
+global _utils_sprintf
 
 
 utils_strlen:
+_utils_strlen:
     ; prolog
     push ebp
     mov ebp, esp
@@ -29,6 +33,7 @@ utils_strlen:
 
 
 utils_strcpy:
+_utils_strcpy:
     ; prolog
     push ebp
     mov ebp, esp
@@ -50,6 +55,7 @@ utils_strcpy:
     ret
 
 utils_sprintf:
+_utils_sprintf:
     ; # ARGUMENTS:
     ; [ EBP +  8 ] = buffer address
     ; [ EBP + 12 ] = format string address

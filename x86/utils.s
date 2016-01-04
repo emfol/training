@@ -59,6 +59,52 @@ _utils_strcpy:
     ret
 
 
+utils_itoa:
+_utils_itoa:
+
+    ; # ARGUMENTS
+    ; [ EBP + 16 ] = numerical base
+    ; [ EBP + 12 ] = buffer address
+    ; [ EBP +  8 ] = signed integer to be encoded
+    ; # LOCALS:
+    ; [ EBP -  4 ] = $N
+    ; [ EBP -  8 ] = $BUF (next byte pointer)
+
+    ; # PROLOG
+    push ebp
+    mov ebp, esp
+    sub esp, byte 8
+
+    ; # PAYLOAD
+    mov eax, dword [ ebp + 8 ]
+    mov dword [ ebp - 4 ], eax
+    mov eax, dword [ ebp + 12 ]
+    mov dword [ ebp - 8 ], eax
+
+    ; load base to ECX
+    mov ecx, dword [ ebp + 16 ]
+    cmp ecx, byte 16
+    je .base16
+    cmp ecx, byte 2
+    jl .abort
+    cmp ecx, byte 36
+    jg .abort
+
+.loop:
+    mov eax, dword [ ebp - 4 ]
+    cdq
+    idiv ecx
+
+.base16:
+.abort:
+    xor eax, eax
+
+    ; # EPILOG
+    mov esp, ebp
+    pop ebp
+    ret
+
+
 utils_sprintf:
 _utils_sprintf:
 
@@ -70,8 +116,9 @@ _utils_sprintf:
     ; [ EBP -  4 ] = $SRC
     ; [ EBP -  8 ] = $DST
     ; [ EBP - 12 ] = $ARG
-    ; [ EBP - 16 ] = $MOD
-    ; [ EBP - 32 ] = $BUF
+    ; [ EBP - 16 ] = $SPF ; format specifier ( not yet used )
+    ; [ EBP - 32 ] = $BUF ; buffer 16 bytes long
+    ; # RETURNS: number of bytes written to buffer ( termination byte not included )
 
     ; # PROLOG
     push ebp

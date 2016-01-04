@@ -3,7 +3,9 @@
 
 bits 32
 
+
 section .text
+
 
 global utils_strlen
 global _utils_strlen
@@ -15,47 +17,51 @@ global _utils_sprintf
 
 utils_strlen:
 _utils_strlen:
-    ; prolog
+    ; # PROLOG
     push ebp
     mov ebp, esp
-    ; payload
+    ; # PAYLOAD
     mov edx, [ ebp + 8 ]
-    xor eax, eax
+    mov eax, edx
 .loop:
-    cmp byte [ edx + eax ], 0
+    cmp byte [ eax ], 0
     je .done
     inc eax
     jmp .loop
 .done:
-    ; epilog
+    sub eax, edx ; adjust EAX
+    ; # EPILOG
     pop ebp
     ret
 
 
 utils_strcpy:
 _utils_strcpy:
-    ; prolog
+    ; # PROLOG
     push ebp
     mov ebp, esp
-    push ebx
-    ; payload
-    mov edx, [ ebp +  8 ] ; source
-    mov ebx, [ ebp + 12 ] ; destination
-    xor ecx, ecx
+    ; # PAYLOAD
+    mov ecx, [ ebp +  8 ] ; source
+    mov edx, [ ebp + 12 ] ; destination
 .loop:
-    mov al, [ edx + ecx ]
-    mov [ ebx + ecx ], al
+    mov al, [ ecx ]
+    mov [ edx ], al
+    cmp al, byte 0
+    je .done
     inc ecx
-    cmp al, 0
-    jne .loop
-    lea eax, [ ecx - 1 ]
-    ; epilog
-    pop ebx
+    inc edx
+    jmp .loop
+.done:
+    mov eax, edx
+    sub eax, [ ebp + 12 ] ; adjust EAX
+    ; # EPILOG
     pop ebp
     ret
 
+
 utils_sprintf:
 _utils_sprintf:
+
     ; # ARGUMENTS:
     ; [ EBP +  8 ] = buffer address
     ; [ EBP + 12 ] = format string address
@@ -64,11 +70,13 @@ _utils_sprintf:
     ; [ EBP -  4 ] = $SRC
     ; [ EBP -  8 ] = $DST
     ; [ EBP - 12 ] = $ARG
+    ; [ EBP - 16 ] = $MOD
+    ; [ EBP - 32 ] = $BUF
 
     ; # PROLOG
     push ebp
     mov ebp, esp
-    sub esp, 12 ; alloc space for locals
+    sub esp, byte 32 ; alloc space for locals
 
     ; # PAYLOAD
     ; initialization
@@ -134,7 +142,7 @@ _utils_sprintf:
     push dword [ ebp - 8 ]
     push eax
     call utils_strcpy
-    add esp, 8
+    add esp, byte 8
     add [ ebp - 8 ], eax
     jmp .loop
 
@@ -145,7 +153,7 @@ _utils_sprintf:
     sub eax, [ ebp + 8 ]
 
     ; # EPILOG
-    ; no need for "add esp, 12"
+    ; no need for "add esp, byte 32"
     mov esp, ebp
     pop ebp
     ret

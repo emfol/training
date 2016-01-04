@@ -21,7 +21,7 @@ _utils_strlen:
     push ebp
     mov ebp, esp
     ; # PAYLOAD
-    mov edx, [ ebp + 8 ]
+    mov edx, dword [ ebp + 8 ]
     mov eax, edx
 .loop:
     cmp byte [ eax ], 0
@@ -41,11 +41,11 @@ _utils_strcpy:
     push ebp
     mov ebp, esp
     ; # PAYLOAD
-    mov ecx, [ ebp +  8 ] ; source
-    mov edx, [ ebp + 12 ] ; destination
+    mov ecx, dword [ ebp +  8 ] ; source
+    mov edx, dword [ ebp + 12 ] ; destination
 .loop:
-    mov al, [ ecx ]
-    mov [ edx ], al
+    mov al, byte [ ecx ]
+    mov byte [ edx ], al
     cmp al, byte 0
     je .done
     inc ecx
@@ -53,7 +53,7 @@ _utils_strcpy:
     jmp .loop
 .done:
     mov eax, edx
-    sub eax, [ ebp + 12 ] ; adjust EAX
+    sub eax, dword [ ebp + 12 ] ; adjust EAX
     ; # EPILOG
     pop ebp
     ret
@@ -81,42 +81,42 @@ _utils_sprintf:
     ; # PAYLOAD
     ; initialization
 
-    mov eax, [ ebp + 8 ] ; buffer address
-    mov [ ebp - 8 ], eax ; ... to $DST
+    mov eax, dword [ ebp + 8 ] ; buffer address
+    mov dword [ ebp - 8 ], eax ; ... to $DST
 
-    mov eax, [ ebp + 12 ] ; format string address
-    mov [ ebp - 4 ], eax ; ... to $SRC
+    mov eax, dword [ ebp + 12 ] ; format string address
+    mov dword [ ebp - 4 ], eax ; ... to $SRC
 
     xor eax, eax ; zero out EAX
-    mov [ ebp - 12 ], eax ; ... to $ARG
+    mov dword [ ebp - 12 ], eax ; ... to $ARG
 
     jmp .loop
 
     ; # SUBROUTINES
 .getc:
-    mov edx, [ ebp - 4 ]
-    mov al, [ edx ]
+    mov edx, dword [ ebp - 4 ]
+    mov al, byte [ edx ]
     inc edx
-    mov [ ebp - 4 ], edx
+    mov dword [ ebp - 4 ], edx
     ret
 .putc:
-    mov edx, [ ebp - 8 ]
-    mov [ edx ], al
+    mov edx, dword [ ebp - 8 ]
+    mov byte [ edx ], al
     inc edx
-    mov [ ebp - 8 ], edx
+    mov dword [ ebp - 8 ], edx
     ret
 .geta:
-    mov ecx, [ ebp - 12 ]
-    mov eax, [ ebp + ecx * 4 + 16 ]
+    mov ecx, dword [ ebp - 12 ]
+    mov eax, dword [ ebp + ecx * 4 + 16 ]
     inc ecx
-    mov [ ebp - 12 ], ecx
+    mov dword [ ebp - 12 ], ecx
     ret
 
 .loop:
     call .getc
-    cmp al, 0
+    cmp al, byte 0
     je .done
-    cmp al, 0x25 ; '%'
+    cmp al, byte 0x25 ; '%'
     je .arg
     ; nor EOF, nor ARG
     ; ... simply put char in buffer
@@ -125,13 +125,13 @@ _utils_sprintf:
 
 .arg:
     call .getc
-    cmp al, 0    ; '\0'
+    cmp al, byte 0    ; '\0'
     je .done
-    cmp al, 0x25 ; '%'
+    cmp al, byte 0x25 ; '%'
     je .arg.esc
-    cmp al, 0x53 ; 'S'
+    cmp al, byte 0x53 ; 'S'
     je .arg.str
-    cmp al, 0x73 ; 's'
+    cmp al, byte 0x73 ; 's'
     je .arg.str
     jmp .loop ; simply discard unsupported types
 .arg.esc: ; write escaped percent sign
@@ -147,10 +147,10 @@ _utils_sprintf:
     jmp .loop
 
 .done:
-    mov eax, [ ebp - 8 ]
+    mov eax, dword [ ebp - 8 ]
     mov byte [ eax ], 0 ; terminate destination string
     ; returns the number of bytes written to buffer
-    sub eax, [ ebp + 8 ]
+    sub eax, dword [ ebp + 8 ]
 
     ; # EPILOG
     ; no need for "add esp, byte 32"

@@ -73,33 +73,58 @@ _utils_itoa:
     ; # PROLOG
     push ebp
     mov ebp, esp
-    sub esp, byte 8
+
 
     ; # PAYLOAD
-    mov eax, dword [ ebp + 8 ]
-    mov dword [ ebp - 4 ], eax
-    mov eax, dword [ ebp + 12 ]
-    mov dword [ ebp - 8 ], eax
+    ; [ EBP - 4 ] <- [ EBP +  8 ]
+    push dword [ ebp +  8 ]
+    ; [ EBP - 8 ] <- [ EBP + 12 ]
+    push dword [ ebp + 12 ]
 
     ; load base to ECX
     mov ecx, dword [ ebp + 16 ]
     cmp ecx, byte 16
     je .base16
     cmp ecx, byte 2
-    jl .abort
+    jl .done
     cmp ecx, byte 36
-    jg .abort
+    jg .done
+
+    ; # SUBROUTINES
+.append:
+    cmp dl, byte 0x0A
+    jge .append.alpha
+    add dl, byte 0x30 ; add '0'
+    jmp .append.write
+.append.alpha:
+    sub dl, byte 0x0A
+    add dl, byte 0x61
+.append.write:
+    mov eax, [ ebp - 8 ]
+    mov byte [ eax ], dl
+    inc eax
+    mov dword [ ebp - 8 ], eax
+    ret
 
 .loop:
     mov eax, dword [ ebp - 4 ]
     cdq
     idiv ecx
+    mov dword [ ebp - 4 ], eax
+    call .append
+    jmp .loop
 
 .base16:
 .abort:
     xor eax, eax
+.done:
+    ; terminate string
+    mov eax, dword [ ebp - 8 ]
+    mov byte [ eax ], 0
+    sub eax, dword [ ebp + 12 ]
 
     ; # EPILOG
+    ; no need for "add esp, byte 8"
     mov esp, ebp
     pop ebp
     ret

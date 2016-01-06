@@ -90,14 +90,15 @@ _utils_itoa:
 
     ; if base 10, check for negative values
     cmp ecx, byte 10
-    jne .algs
+    jne .algsel
     test eax, eax
-    jns .algs
+    jns .loop
     neg eax
     mov byte [ edi ], 0x2D ; '-' (prepend minus sign)
     inc edi
+    jmp .loop
 
-.algs:
+.algsel:
     ; determine best algorithm
     cmp ecx, byte 2
     je .alt

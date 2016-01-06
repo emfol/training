@@ -10,6 +10,13 @@ int main( int argc, char **argv )
     unsigned int t, r;
     char buf[2048];
     struct { int n; char *s; int b; } *lsp, ls[] = { 
+        { -1, "11111111111111111111111111111111", 2 },
+        { -1, "ffffffff", 16 },
+        { -1, "-1", 10 },
+        { -8192, "-8192", 10 },
+        { -128, "-128", 10 },
+        { -128, "ffffff80", 16 },
+        { -128, "11111111111111111111111110000000", 2 },
         { 0x1234, "1234", 16 },
         { 1234, "1234", 10 },
         { 0xC0FFEE, "110000001111111111101110", 2 },
@@ -30,7 +37,7 @@ int main( int argc, char **argv )
         }
     }
 
-    for ( i = 0; i < 6; i++ ) {
+    for ( i = 0; i < 13; i++ ) {
         lsp = &ls[i];
         r = utils_itoa( lsp->n, buf, lsp->b );
         printf( "Result: ( %d, %d ) -> \"%s\" ( %d )\n", lsp->n, lsp->b, buf, r );

@@ -66,66 +66,99 @@ _utils_itoa:
     ; [ EBP + 16 ] = numerical base
     ; [ EBP + 12 ] = buffer address
     ; [ EBP +  8 ] = signed integer to be encoded
-    ; # LOCALS:
-    ; [ EBP -  4 ] = $N
-    ; [ EBP -  8 ] = $BUF (next byte pointer)
 
     ; # PROLOG
     push ebp
     mov ebp, esp
-
+    push esi
+    push edi
 
     ; # PAYLOAD
-    ; [ EBP - 4 ] <- [ EBP +  8 ]
-    push dword [ ebp +  8 ]
-    ; [ EBP - 8 ] <- [ EBP + 12 ]
-    push dword [ ebp + 12 ]
-
-    ; load base to ECX
+    ; load registers with parameters
+    mov eax, dword [ ebp +  8 ]
+    mov esi, dword [ ebp + 12 ]
+    mov edi, esi
     mov ecx, dword [ ebp + 16 ]
-    cmp ecx, byte 16
-    je .base16
+
+    ; check if conversion base is valid
     cmp ecx, byte 2
     jl .done
     cmp ecx, byte 36
     jg .done
 
-    ; # SUBROUTINES
+    ; check for negative values
+    test eax, eax
+    jns .alg
+    neg eax
+    mov byte [ edi ], 0x2D ; '-'
+    inc edi
+
+.alg:
+    ; determine best algorithm
+    cmp ecx, byte 2
+    je .loop.alt
+    cmp ecx, byte 4
+    je .loop.alt
+    cmp ecx, byte 8
+    je .loop.alt
+    cmp ecx, byte 16
+    je .loop.alt
+    cmp ecx, byte 32
+    je .loop.alt
+    jmp .loop
+
+    ; subroutine for translating and storing digits
 .append:
-    cmp dl, byte 0x0A
+    cmp al, byte 0x0A
     jge .append.alpha
-    add dl, byte 0x30 ; add '0'
+    add al, byte 0x30 ; '0'
     jmp .append.write
 .append.alpha:
-    sub dl, byte 0x0A
-    add dl, byte 0x61
+    add al, byte 0x57 ; AL = AL - 0x0A + 0x61 ( 'a' )
 .append.write:
-    mov eax, [ ebp - 8 ]
-    mov byte [ eax ], dl
-    inc eax
-    mov dword [ ebp - 8 ], eax
+    mov byte [ edi ], al
+    inc edi
     ret
 
 .loop:
-    mov eax, dword [ ebp - 4 ]
-    cdq
-    idiv ecx
-    mov dword [ ebp - 4 ], eax
+    cdq ; sign-extend EAX to EDX:EAX
+    div ecx ; divide by base
+    xchg eax, edx
     call .append
+    mov eax, edx
+    test eax, eax
+    jz .reverse
     jmp .loop
 
-.base16:
-.abort:
-    xor eax, eax
+.loop.alt:
+    mov edx, eax
+    lea eax, [ ecx - 1 ]
+    and eax, edx
+    call .append
+    bsr eax, ecx
+    xchg eax, ecx
+    shr edx, cl
+    mov ecx, eax
+    mov eax, edx
+    test eax, eax
+    jz .reverse
+    jmp .loop.alt
+
+.reverse:
+    cmp edi, esi
+    jle .done
+    mov eax, edi
+    cmp byte [ esi ], 0x2D
 .done:
-    ; terminate string
-    mov eax, dword [ ebp - 8 ]
+    mov eax, edi
+    cmp edi, esi
+    mov eax, ebx
     mov byte [ eax ], 0
     sub eax, dword [ ebp + 12 ]
 
     ; # EPILOG
-    ; no need for "add esp, byte 8"
-    mov esp, ebp
+    pop edi
+    pop esi
     pop ebp
     ret
 

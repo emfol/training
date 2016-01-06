@@ -11,6 +11,8 @@ global utils_strlen
 global _utils_strlen
 global utils_strcpy
 global _utils_strcpy
+global utils_itoa
+global _utils_itoa
 global utils_sprintf
 global _utils_sprintf
 
@@ -65,7 +67,7 @@ _utils_itoa:
     ; # ARGUMENTS
     ; [ EBP + 16 ] = numerical base
     ; [ EBP + 12 ] = buffer address
-    ; [ EBP +  8 ] = signed integer to be encoded
+    ; [ EBP +  8 ] = integer to be encoded
 
     ; # PROLOG
     push ebp
@@ -86,25 +88,27 @@ _utils_itoa:
     cmp ecx, byte 36
     jg .done
 
-    ; check for negative values
+    ; if base 10, check for negative values
+    cmp ecx, byte 10
+    jne .algs
     test eax, eax
-    jns .alg
+    jns .algs
     neg eax
-    mov byte [ edi ], 0x2D ; '-'
+    mov byte [ edi ], 0x2D ; '-' (prepend minus sign)
     inc edi
 
-.alg:
+.algs:
     ; determine best algorithm
     cmp ecx, byte 2
-    je .loop.alt
+    je .alt
     cmp ecx, byte 4
-    je .loop.alt
+    je .alt
     cmp ecx, byte 8
-    je .loop.alt
+    je .alt
     cmp ecx, byte 16
-    je .loop.alt
+    je .alt
     cmp ecx, byte 32
-    je .loop.alt
+    je .alt
     jmp .loop
 
     ; subroutine for translating and storing digits
@@ -114,7 +118,7 @@ _utils_itoa:
     add al, byte 0x30 ; '0'
     jmp .append.write
 .append.alpha:
-    add al, byte 0x57 ; AL = AL - 0x0A + 0x61 ( 'a' )
+    add al, byte 0x57 ; 'a' - 0x0A 
 .append.write:
     mov byte [ edi ], al
     inc edi
@@ -125,37 +129,51 @@ _utils_itoa:
     div ecx ; divide by base
     xchg eax, edx
     call .append
-    mov eax, edx
+    xchg eax, edx
     test eax, eax
-    jz .reverse
-    jmp .loop
+    jnz .loop
+    jmp .done
 
-.loop.alt:
-    mov edx, eax
-    lea eax, [ ecx - 1 ]
-    and eax, edx
-    call .append
-    bsr eax, ecx
+.alt:
+    ; since we know ECX value is between 2 and 36
+    ; ... it's whole value is within CL
+    bsr edx, ecx
+    mov dh, cl
+    dec dh
+.alt.loop:
+    mov cl, dh
+    and ecx, eax
     xchg eax, ecx
-    shr edx, cl
-    mov ecx, eax
-    mov eax, edx
-    test eax, eax
-    jz .reverse
-    jmp .loop.alt
+    call .append
+    xchg eax, ecx
+    mov cl, dl
+    shr eax, cl
+    jnz .alt.loop
 
-.reverse:
-    cmp edi, esi
-    jle .done
-    mov eax, edi
-    cmp byte [ esi ], 0x2D
 .done:
+    mov byte [ edi ], 0 ; terminate string
     mov eax, edi
+    sub eax, esi
+    jz .leave
+    ; prepare to reverse digits
+    xor ecx, ecx
+    cmp byte [ esi ], 0x2D ; '-'
+    sete cl ; set CL to 1 if minus sign is set
+    add esi, ecx
+    dec edi
+    ; reverse loop
+.rev.loop:
     cmp edi, esi
-    mov eax, ebx
-    mov byte [ eax ], 0
-    sub eax, dword [ ebp + 12 ]
+    jle .leave
+    mov cl, byte [ esi ]
+    mov ch, byte [ edi ]
+    mov byte [ esi ], ch
+    mov byte [ edi ], cl
+    inc esi
+    dec edi
+    jmp .rev.loop
 
+.leave:
     ; # EPILOG
     pop edi
     pop esi

@@ -41,7 +41,7 @@ int main( int argc, char **argv )
         lsp = &ls[i];
         r = utils_itoa( lsp->n, buf, lsp->b );
         printf( "Result: ( %d, %d ) -> \"%s\" ( %d )\n", lsp->n, lsp->b, buf, r );
-        if ( ( t = strlen( buf ) ) != r )
+        if ( ( t = strlen( buf ) ) != r || ( t = utils_strlen( buf ) ) != r )
             printf( "  > Expecting length %u and got %u...\n", t, r );
         if ( strcmp( lsp->s, buf ) != 0 )
             printf( "  > Expecting string \"%s\" and got \"%s\"...\n", lsp->s, buf );

@@ -25,7 +25,7 @@ CC     := cc
 ASM    := nasm
 CFLAGS := -m32 -ansi -pedantic -g
 AFLAGS := -g
-LDARGS := -g
+LDARGS :=
 
 ifeq ($(OS),Linux)
   SRC_SYS := sys/linux.s

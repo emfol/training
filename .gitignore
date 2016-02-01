@@ -7,6 +7,7 @@ build/
 bin/
 tmp/
 .cache/
+*.dSYM/
 
 # Binary Files
 *.class

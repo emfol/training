@@ -1,5 +1,6 @@
 
-OS := $(shell uname -s)
+OS  := $(shell uname -s)
+ARC := $(shell uname -m)
 
 SRC_SYS   :=
 SRC_CRT   := crt.s
@@ -24,9 +25,13 @@ CC     := cc
 ASM    := nasm
 CFLAGS := -m32 -ansi -pedantic -g
 AFLAGS := -g
+LDARGS := -g
 
 ifeq ($(OS),Linux)
   SRC_SYS := sys/linux.s
+  ifeq ($(ARC),x86_64)
+    LDARGS := -m elf_i386 $(LDARGS)
+  endif
 else
   SRC_SYS := sys/unix.s
 endif
@@ -38,7 +43,7 @@ else
 endif
 
 $(EXE_HW): $(OBJ_HW) $(DEPS)
-	ld -o $@ $+
+	ld $(LDARGS) -o $@ $+
 
 $(OBJ_HW): $(SRC_HW)
 	$(ASM) $(AFLAGS) -l $(@:.o=.l) -o $@ $(SRC_HW)

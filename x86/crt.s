@@ -35,7 +35,7 @@ section .text
         mov [ esp + 8 ], eax
         ; set last argument as a NULL pointer
         xor eax, eax
-        mov eax, dword [ esp + 12 ]
+        mov dword [ esp + 12 ], eax
         call main
         add esp, 16
 

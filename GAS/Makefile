@@ -8,7 +8,7 @@ $(EXE): $(OBJ)
 	strip $@
 
 $(OBJ): $(SRC)
-	as -arch i386 -o $@ $(SRC)
+	as -al=listing.txt -march=i386 -o $@ $(SRC)
 
 clean:
 	rm -f $(OBJ) $(EXE) 2>&1 > /dev/null

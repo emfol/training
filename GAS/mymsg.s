@@ -5,9 +5,10 @@
  * @motivation "Training AT&T Assembly Syntax"
  */
 
-    .global start
-
     .text
+
+    .globl start
+    .globl _start
 
 exit:
     movl $1, %eax
@@ -25,13 +26,14 @@ strlen:
   strlen_loop:
     cmpb $0, (%eax)
     je strlen_exit
-    inc %eax
+    incl %eax
     jmp strlen_loop
   strlen_exit:
     subl %ecx, %eax
     ret
 
 start:
+_start:
 
     pushl %ebp
     movl %esp, %ebp
@@ -45,25 +47,25 @@ start:
     jmp start_stdFlw
 
   start_stdMsg:
-    mov $msg, %eax
+    movl $msg, %eax
 
   start_stdFlw:
     movl %eax, -4(%ebp)
 
     /* how long is the string? */
     pushl %eax
-    call strlen
+    calll strlen
     addl $4, %esp
     /* now lets print it... */
     pushl %eax
     pushl -4(%ebp)
     pushl $1
-    call write
+    calll write
     addl $12, %esp
 
     /* clean exit... */
     pushl $0
-    call exit
+    calll exit
 
     /* playing safe... */
     leave

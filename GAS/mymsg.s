@@ -75,5 +75,5 @@ _start:
     .data
 
 msg:
-.ascii "Nothing more than my default message...\n\0"
+    .asciz "Nothing more than my default message...\n"
 

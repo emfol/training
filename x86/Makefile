@@ -64,5 +64,5 @@ $(EXE_TEST): $(SRC_TEST) $(H_UTILS) $(OBJ_UTILS)
 	$(CC) $(CFLAGS) -o $@ $(OBJ_UTILS) $(SRC_TEST)
 
 clean:
-	rm -f *.x *.o *.l 2>&1 > /dev/null
+	rm -f *.x *.o *.l > /dev/null 2>&1
 

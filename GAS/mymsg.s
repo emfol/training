@@ -5,7 +5,7 @@
  * @motivation "Training AT&T Assembly Syntax"
  */
 
-    .text
+    .section .text
 
     .globl start
     .globl _start
@@ -72,7 +72,7 @@ _start:
     ret
 
 
-    .data
+    .section .data
 
 msg:
     .asciz "Nothing more than my default message...\n"

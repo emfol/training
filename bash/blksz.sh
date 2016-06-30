@@ -1,11 +1,17 @@
 #!/bin/bash
 
+if [ 'Darwin' = "$(uname -s)" ]
+then
+    declare ARGF='-f %z'
+else
+    declare ARGF='-c %s'
+fi
 
 if [ -f "$1" ]
 then
 
     declare FILE="$1"
-    declare -i FILE_SIZE=$(stat -c %s "$FILE")
+    declare -i FILE_SIZE=$(stat $ARGF "$FILE")
     declare -i BLK=1
     declare -i N=0
     declare -i I=2

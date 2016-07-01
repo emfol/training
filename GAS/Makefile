@@ -36,5 +36,10 @@ $(OBJ): $(SRC)
 	as $(ASARGS) -o $@ $(SRC)
 
 clean:
-	rm -f $(OBJ) $(EXE) > /dev/null 2>&1
+	rm -f $(OBJ) $(EXE) max.o max > /dev/null 2>&1
 
+max: max.o
+	ld $(LDARGS) -o $@ max.o
+
+max.o: max.s
+	as $(ASARGS) -o $@ max.s

@@ -11,7 +11,7 @@ LDARGS := -static
 
 ifeq ($(OS),Linux)
 
-  ASARGS := -march=i586 $(ASARGS)
+  ASARGS := -march=i386 $(ASARGS)
 
   ifeq ($(ARC),x86_64)
     ASARGS := --32 $(ASARGS)

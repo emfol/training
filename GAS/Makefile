@@ -7,7 +7,7 @@ OBJ := $(SRC:.s=.o)
 EXE := $(OBJ:.o=)
 
 ASARGS :=
-LDARGS := -static
+LDARGS :=
 
 ifeq ($(OS),Linux)
 
@@ -35,11 +35,18 @@ $(EXE): $(OBJ)
 $(OBJ): $(SRC)
 	as $(ASARGS) -o $@ $(SRC)
 
-clean:
-	rm -f $(OBJ) $(EXE) max.o max > /dev/null 2>&1
-
 max: max.o
 	ld $(LDARGS) -o $@ max.o
 
 max.o: max.s
 	as $(ASARGS) -o $@ max.s
+
+power: power.o
+	ld --entry _main --dynamic-linker /lib/ld-linux.so.2 power.o -lc -o $@
+
+power.o: power.s
+	as $(ASARGS) -o $@ power.s
+
+.PHONY: clean
+clean:
+	rm -f $(OBJ) $(EXE) max.o max power.o power > /dev/null 2>&1

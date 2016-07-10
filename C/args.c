@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define FORMAT "%02d. %s (%u)\n"
+#define FORMAT "%02d. %s (%lu)\n"
 
 int main(int argc, char **argv) {
 

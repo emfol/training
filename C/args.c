@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 
   for (i = 1; i < argc; i++) {
     p = *(argv + i);
-    printf(FORMAT, i, p, strlen(p));
+    printf(FORMAT, i, p, (unsigned long)strlen(p));
   }
 
   return EXIT_SUCCESS;
